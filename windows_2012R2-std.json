@@ -1,0 +1,62 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "iso_url": "file:///D:/vms/packer/DSC/iso/SW_DVD9_Windows_Svr_Std_and_DataCtr_2012_R2_64Bit_English_-2_Core_MLF_X19-31419.iso",
+      "iso_checksum_type": "md5",
+      "iso_checksum": "fb101ed6d7328aca6473158006630a9d",
+      "headless": false,
+      "boot_wait": "3m",
+      "ssh_username": "sbp_build",
+      "ssh_password": "sbp_build",
+      "ssh_wait_timeout": "2h",
+      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
+      "guest_os_type": "Windows2012_64",
+      "disk_size": 61440,
+      "floppy_files": [
+	    "./tests/pre-jenkins/*",
+        "./floppy/answer_files/2012_r2/Autounattend.xml",
+		"./floppy/answer_files/2012_r2/win2012r2std.xml",
+		"./floppy/security/SBP2012.inf",
+		"./floppy/security_baseline.ps1",
+		"./floppy/microsoft-updates.bat",
+        "./floppy/win-updates.ps1",
+        "./floppy/openssh.ps1",
+        "./floppy/Xentools.ps1",
+		"./floppy/run-pretests.ps1",
+		"./floppy/cleanup.ps1",
+        "./floppy/oracle-cert.cer"
+      ],
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "2048"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "2"
+        ]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "remote_path": "/tmp/script.bat",
+      "execute_command": "{{.Vars}} cmd /c C:/Windows/Temp/script.bat",
+      "scripts": [
+		"./scripts/sbp-build.bat"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "rm -rf /tmp/*"
+      ]
+    }
+  ]
+}
